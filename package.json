@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build && eslint --ignore-pattern 'deployment/k8s/*.yaml'",
+    "build": "next build",
     "start": "next start -p 3001",
     "lint": "next lint"
   },
