@@ -8,9 +8,9 @@ pipeline {
         FULL_IMAGE_NAME = "${DOCKER_REGISTRY}/${DOCKER_IMAGE}"
     }
     stages {
-        stage('Checkout') {
+        stage('Clone Repository') {
             steps {
-                checkout scm
+                git branch: 'main', url: 'https://github.com/prasad-potdar/nextjs-docker-jenkins-cicd-deployment-test.git'
             }
         }
         stage('Build Docker Image') {
