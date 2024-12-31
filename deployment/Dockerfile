@@ -7,23 +7,24 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Install the application dependencies
-RUN npm install
+# Install dependencies
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of the application files
 COPY . .
 
-# Set the build arguments
+# Exclude YAML linting or disable ESLint entirely
+ENV NEXT_DISABLE_ESLINT=true
+
+# Set build arguments
 ARG BUILD_NUMBER
 ENV BUILD_NUMBER=$BUILD_NUMBER
 
-# Ensure necessary files exist before build
-ENV NEXT_DISABLE_ESLINT=true
+# Build the Next.js application
 RUN npm run build
-
 
 # Expose the application port
 EXPOSE 3001
 
-# Command to run the application
+# Start the application
 CMD ["npm", "start"]
