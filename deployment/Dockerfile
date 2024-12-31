@@ -7,13 +7,13 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies with legacy peer deps handling
 RUN npm install --legacy-peer-deps
 
 # Copy the rest of the application files
 COPY . .
 
-# Exclude YAML linting or disable ESLint entirely
+# Disable ESLint for builds
 ENV NEXT_DISABLE_ESLINT=true
 
 # Set build arguments
