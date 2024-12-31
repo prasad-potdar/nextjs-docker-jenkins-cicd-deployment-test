@@ -13,18 +13,9 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/prasad-potdar/nextjs-docker-jenkins-cicd-deployment-test.git'
             }
         }
-        stage('Build Docker Image') {
+        stage('Build and Push Docker Image') {
             steps {
                 script {
-                    // Build Docker image
-                     sh "docker build -t ${FULL_IMAGE_NAME}:${env.BUILD_NUMBER} ."
-                }
-            }
-        }
-        stage('Push Docker Image to Registry') {
-            steps {
-                script {
-                    // Log into Docker registry
                     withCredentials([string(credentialsId: 'docker-hub-access-token', variable: 'DOCKER_ACCESS_TOKEN')]) {
                         // Login to Docker Hub
                         sh """
