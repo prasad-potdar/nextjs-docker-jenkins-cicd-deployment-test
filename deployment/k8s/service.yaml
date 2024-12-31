@@ -7,7 +7,7 @@ spec:
     app: nextjs-app
   ports:
     - protocol: TCP
-      port: 80        # Expose on this port
-      targetPort: 3001 # Container's internal port
-      nodePort: 30081  # Assign a port on the node for external access
-  type: NodePort  # Expose the service via NodePort
+      port: 80
+      targetPort: 3001
+      nodePort: 30081
+  type: NodePort
