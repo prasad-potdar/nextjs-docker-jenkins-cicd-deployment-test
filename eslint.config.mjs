@@ -11,8 +11,8 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.config({
-    extends: ['next', 'prettier'],
-    ignorePatterns: ["deployment/k8s/**/*.yaml"],
+    extends: ['next', 'prettier', 'next/core-web-vitals'],
+    ignorePatterns: ['deployment/**/*.yaml', 'deployment/**/*.yml'],
   }),
 ];
 
