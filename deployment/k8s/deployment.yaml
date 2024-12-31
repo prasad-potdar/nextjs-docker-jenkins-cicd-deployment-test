@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: nextjs-app
-          image: https://hub.docker.com/repository/docker/prasadmpotdar/nextjs-app
+          image: <IMAGE_TAG>
           ports:
             - containerPort: 3001  # Update container port to 3001

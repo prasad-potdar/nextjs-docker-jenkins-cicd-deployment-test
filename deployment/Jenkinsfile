@@ -1,18 +1,20 @@
 pipeline {
     agent any
+
     environment {
-        DOCKER_IMAGE = 'nextjs-app'
-        DOCKER_REGISTRY = 'https://hub.docker.com/r/prasadmpotdar'
-        K8S_NAMESPACE = 'default'
-        K8S_DEPLOYMENT_NAME = 'nextjs-app-deployment'
-        FULL_IMAGE_NAME = "${DOCKER_REGISTRY}/${DOCKER_IMAGE}"
+        IMAGE_NAME = 'nextjs-app' // Update with your application name
+        REGISTRY_HOST = 'prasadmpotdar' // Docker Hub username
+        FULL_IMAGE_NAME = "${REGISTRY_HOST}/${IMAGE_NAME}"
+        DOCKER_REPO_URL = 'https://hub.docker.com/r/prasadmpotdar/nextjs-app' // Docker Hub repository URL
     }
+
     stages {
         stage('Clone Repository') {
             steps {
                 git branch: 'main', url: 'https://github.com/prasad-potdar/nextjs-docker-jenkins-cicd-deployment-test.git'
             }
         }
+
         stage('Build and Push Docker Image') {
             steps {
                 script {
@@ -33,15 +35,31 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Deploy Docker image to Kubernetes
+                    // Replace the <IMAGE_TAG> placeholder in deployment.yaml with the actual image tag
                     sh """
-                        kubectl set image deployment/$K8S_DEPLOYMENT_NAME nextjs-app=$DOCKER_REGISTRY/$DOCKER_IMAGE --namespace=$K8S_NAMESPACE
+                    sed -i 's|<IMAGE_TAG>|${FULL_IMAGE_NAME}:${env.BUILD_NUMBER}|g' deployment/k8s/deployment.yaml
+                    kubectl apply -f deployment/k8s/deployment.yaml
+                    kubectl apply -f deployment/k8s/service.yaml
                     """
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo "Image pushed to Docker Hub: ${DOCKER_REPO_URL}"
+            echo 'Deployment Successful'
+        }
+        failure {
+            echo 'Deployment Failed'
         }
     }
 }
