@@ -13,10 +13,12 @@ RUN npm install
 # Copy the rest of the application files
 COPY . .
 
-# Build the NestJS application
+# Set the build arguments
 ARG BUILD_NUMBER
 ENV BUILD_NUMBER=$BUILD_NUMBER
-RUN npm run build
+
+# Ensure necessary files exist before build
+RUN test -f package.json && test -f tsconfig.json && npm run build
 
 # Expose the application port
 EXPOSE 3001
