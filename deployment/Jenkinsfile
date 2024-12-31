@@ -1,65 +1,47 @@
 pipeline {
     agent any
-
     environment {
-        IMAGE_NAME = 'nestjs-app'
-        REGISTRY_HOST = 'prasadmpotdar'
-        FULL_IMAGE_NAME = "${REGISTRY_HOST}/${IMAGE_NAME}"
-        DOCKER_REPO_URL = 'https://hub.docker.com/r/prasadmpotdar/nextjs-app' // Docker Hub repository URL
+        DOCKER_IMAGE = 'nextjs-app'
+        DOCKER_REGISTRY = 'https://hub.docker.com/r/prasadmpotdar'
+        K8S_NAMESPACE = 'default'
+        K8S_DEPLOYMENT_NAME = 'nextjs-app-deployment'
     }
-
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/prasad-potdar/nextjs-docker-cicd-deployment-test.git'
+                checkout scm
             }
         }
-
-        stage('Build and Push Docker Image') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'docker-hub-access-token', variable: 'DOCKER_ACCESS_TOKEN')]) {
-                        // Login to Docker Hub
-                        sh """
-                        echo $DOCKER_ACCESS_TOKEN | docker login -u $REGISTRY_HOST --password-stdin
-                        """
-
-                        // Build and push Docker image
-                        sh """
-                        docker build -t ${FULL_IMAGE_NAME}:${env.BUILD_NUMBER} -f deployment/Dockerfile .
-                        docker tag ${FULL_IMAGE_NAME}:${env.BUILD_NUMBER} ${FULL_IMAGE_NAME}:latest
-                        docker push ${FULL_IMAGE_NAME}:${env.BUILD_NUMBER}
-                        docker push ${FULL_IMAGE_NAME}:latest
-                        """
-                    }
+                    // Build Docker image
+                    sh "docker build -t $DOCKER_IMAGE ."
                 }
             }
         }
-
+        stage('Push Docker Image to Registry') {
+            steps {
+                script {
+                    // Log into Docker registry
+                    withCredentials([usernamePassword(credentialsId: 'docker-creds', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_REGISTRY"
+                    }
+                    // Push Docker image to registry
+                    sh "docker tag $DOCKER_IMAGE $DOCKER_REGISTRY/$DOCKER_IMAGE"
+                    sh "docker push $DOCKER_REGISTRY/$DOCKER_IMAGE"
+                }
+            }
+        }
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Replace the <IMAGE_TAG> placeholder in deployment.yaml with the actual image tag
+                    // Deploy Docker image to Kubernetes
                     sh """
-                    sed -i "" 's|<IMAGE_TAG>|${FULL_IMAGE_NAME}:${env.BUILD_NUMBER}|g' deployment/k8s/deployment.yaml
-                    kubectl apply -f deployment/k8s/deployment.yaml
-                    kubectl apply -f deployment/k8s/service.yaml
+                        kubectl set image deployment/$K8S_DEPLOYMENT_NAME nextjs-app=$DOCKER_REGISTRY/$DOCKER_IMAGE --namespace=$K8S_NAMESPACE
                     """
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            cleanWs()
-        }
-        success {
-            echo "Image pushed to Docker Hub: ${DOCKER_REPO_URL}"
-            echo 'Deployment Successful'
-        }
-        failure {
-            echo 'Deployment Failed'
         }
     }
 }

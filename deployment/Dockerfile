@@ -1,17 +1,24 @@
-FROM node:20
+# Use Node.js 20 official image as a base
+FROM node:20 AS base
 
-WORKDIR /usr/src/app
+# Set working directory
+WORKDIR /app
 
-COPY package*.json ./
+# Install dependencies
+FROM base AS deps
+COPY package.json package-lock.json ./
+RUN npm install --frozen-lockfile
 
-RUN npm install --legacy-peer-deps
-
+# Copy the rest of the application
+FROM deps AS build
 COPY . .
-
-ENV NEXT_DISABLE_ESLINT=true
-
 RUN npm run build
 
+# Expose port 3001
 EXPOSE 3001
 
+# Run the Next.js app on port 3001 in production mode
+FROM base AS prod
+COPY --from=build /app ./
 CMD ["npm", "start"]
+    
