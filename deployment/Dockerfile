@@ -18,7 +18,9 @@ ARG BUILD_NUMBER
 ENV BUILD_NUMBER=$BUILD_NUMBER
 
 # Ensure necessary files exist before build
-RUN NEXT_DISABLE_ESLINT=true npm run build
+ENV NEXT_DISABLE_ESLINT=true
+RUN npm run build
+
 
 # Expose the application port
 EXPOSE 3001
