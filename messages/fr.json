@@ -1,0 +1,19 @@
+{
+  "NavbarLinks": {
+    "home": "Accueil",
+    "homeTitle": "Page d'accueil",
+    "about": "À propos",
+    "aboutTitle": "Page À propos",
+    "users": "Utilisateurs",
+    "usersTitle": "Page des utilisateurs"
+  },
+  "HomePage": {
+    "title": "Page d'accueil"
+  },
+  "AboutPage": {
+    "title": "À propos"
+  },
+  "UsersPage": {
+    "title": "Utilisateurs"
+  }
+}
